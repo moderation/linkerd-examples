@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io"
@@ -52,8 +53,16 @@ func main() {
 	size := uint64(0)
 	timeout := time.After(*interval)
 
-	client := &http.Client{}
 	received := make(chan uint64)
+	config := tls.Config{
+		InsecureSkipVerify: true,
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: &config,
+	}
+	client := &http.Client{Transport: tr}
+
 	for i := uint(0); i != *concurrency; i++ {
 		go func() {
 			for {
